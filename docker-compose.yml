@@ -7,8 +7,8 @@ version: '3.7'
 services:
   # Airflow Webserver service
   airflow-webserver:
-    # Use the official Airflow image
-    image: apache/airflow:2.8.1
+    # Build the custom image from the Dockerfile
+    build: .
     container_name: airflow-webserver
     restart: always
     # Map port 8080 from the container to the host for UI access
@@ -30,11 +30,18 @@ services:
       - ./data:/opt/airflow/data
     # Command to initialize and run the webserver
     command: webserver
+    # Health check to ensure the webserver is running and responsive
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   # Airflow Scheduler service
   airflow-scheduler:
-    # Use the same image as the webserver for consistency
-    image: apache/airflow:2.8.1
+    # Build the custom image from the Dockerfile
+    build: .
     container_name: airflow-scheduler
     restart: always
     depends_on:
@@ -50,6 +57,13 @@ services:
       - ./data:/opt/airflow/data
     # Command to run the scheduler
     command: scheduler
+    # Health check for the scheduler process
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --hostname `hostname` || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   # PostgreSQL database service for Airflow metadata
   airflow-postgres:
@@ -65,7 +79,7 @@ services:
 
   # Service to initialize the Airflow database
   airflow-init:
-    image: apache/airflow:2.8.1
+    build: .
     container_name: airflow-init
     depends_on:
       - airflow-postgres
