@@ -1,0 +1,79 @@
+# docker-compose.yml
+# This file orchestrates the services required for the data pipeline, including
+# an Airflow environment and a PostgreSQL database for its metadata.
+
+version: '3.7'
+
+services:
+  # Airflow Webserver service
+  airflow-webserver:
+    # Use the official Airflow image
+    image: apache/airflow:2.8.1
+    container_name: airflow-webserver
+    restart: always
+    # Map port 8080 from the container to the host for UI access
+    ports:
+      - "8080:8080"
+    # Ensure the container waits for the Postgres service to be ready
+    depends_on:
+      - airflow-postgres
+      - airflow-init
+    # Define environment variables for the Airflow connection to the database
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      - AIRFLOW_UID=50000
+    # Map volumes to persist data (DAGs, logs, and data lake)
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
+    # Command to initialize and run the webserver
+    command: webserver
+
+  # Airflow Scheduler service
+  airflow-scheduler:
+    # Use the same image as the webserver for consistency
+    image: apache/airflow:2.8.1
+    container_name: airflow-scheduler
+    restart: always
+    depends_on:
+      - airflow-postgres
+      - airflow-init
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      - AIRFLOW_UID=50000
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
+    # Command to run the scheduler
+    command: scheduler
+
+  # PostgreSQL database service for Airflow metadata
+  airflow-postgres:
+    image: postgres:13
+    container_name: airflow-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - airflow-postgres-data:/var/lib/postgresql/data
+
+  # Service to initialize the Airflow database
+  airflow-init:
+    image: apache/airflow:2.8.1
+    container_name: airflow-init
+    depends_on:
+      - airflow-postgres
+    environment:
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      - AIRFLOW_UID=50000
+    command: bash -c "airflow db migrate && airflow users create --username airflow --password airflow --firstname anonymous --lastname admin --role Admin --email airflow@example.com"
+
+# Define the volumes used by the services
+volumes:
+  airflow-postgres-data:
