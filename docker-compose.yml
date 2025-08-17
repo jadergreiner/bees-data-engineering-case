@@ -86,7 +86,7 @@ services:
     environment:
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
       - AIRFLOW_UID=50000
-    command: bash -c "airflow db migrate && airflow users create --username airflow --password airflow --firstname anonymous --lastname admin --role Admin --email airflow@example.com"
+    command: bash -c "airflow db init && airflow users create --username airflow --password airflow --firstname anonymous --lastname admin --role Admin --email airflow@example.com"
 
 # Define the volumes used by the services
 volumes:
