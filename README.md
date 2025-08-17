@@ -24,25 +24,22 @@ The pipeline is designed to be **scalable, robust, and observable**, covering as
 
 The main goal is to build a solution that meets the following requirements:
 
-1. **API:** Extract data from the [Open Brewery DB API](https://www.openbrewerydb.org/).
+1.  **API:** Extract data from the [Open Brewery DB API](https://www.openbrewerydb.org/).
 
-2. **Orchestration:** Orchestrate the data pipeline with a tool like Airflow.
+2.  **Orchestration:** Orchestrate the data pipeline with a tool like Airflow.
 
-3. **Language:** Use Python for data processing and transformation.
+3.  **Language:** Use Python for data processing and transformation.
 
-4. **Data Lake:** Implement the Medallion architecture with Bronze, Silver, and Gold layers.
+4.  **Data Lake:** Implement the Medallion architecture with Bronze, Silver, and Gold layers.
 
-5. **Transformations:**
+5.  **Transformations:**
+    * **Bronze:** Persist raw data in JSON format.
+    * **Silver:** Transform data to Parquet format, partitioning by `state`.
+    * **Gold:** Create an aggregated layer with the count of breweries per type and per state.
 
-   * **Bronze:** Persist raw data in JSON format.
+6.  **Containerization:** Use Docker and Docker Compose for environment isolation.
 
-   * **Silver:** Transform data to Parquet format, partitioning by `state`.
-
-   * **Gold:** Create an aggregated layer with the count of breweries per type and per state.
-
-6. **Containerization:** Use Docker and Docker Compose for environment isolation.
-
-7. **Repository:** Maintain the project in a public GitHub repository with clear documentation.
+7.  **Repository:** Maintain the project in a public GitHub repository with clear documentation.
 
 ---
 
@@ -84,7 +81,7 @@ No additional configuration is necessary. The `docker-compose.yml` will automati
 Start the Docker environment with the following command:
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 Wait a few minutes for all services to start (Airflow Webserver, Scheduler).
@@ -93,7 +90,6 @@ Access the Airflow UI in your browser:
 [http://localhost:8080](http://localhost:8080)
 
 * **Default User:** `airflow`
-
 * **Default Password:** `airflow`
 
 In the Airflow UI, you will find the DAG (Directed Acyclic Graph) named `breweries_pipeline`. Enable it and trigger it manually to start the flow.
@@ -101,11 +97,8 @@ In the Airflow UI, you will find the DAG (Directed Acyclic Graph) named `breweri
 ### 4. Project Structure
 
 * `dags/`: Contains the `breweries_pipeline.py` file with the DAG definition.
-
 * `src/`: Contains the Python code for the extraction and transformation functions.
-
 * `data/`: Output folder for the data lake layers (Bronze, Silver, and Gold). **This folder will be created automatically after the pipeline runs.**
-
 * `docker-compose.yml`: File to orchestrate the Docker containers (Airflow Webserver and Scheduler).
 
 ---
@@ -120,10 +113,8 @@ In the Airflow UI, you will find the DAG (Directed Acyclic Graph) named `breweri
 
 The Medallion architecture is a recommended practice for data lakes because:
 
-* **Bronze:** Guarantees the immuability of raw data, serving as a reliable source for reprocessing.
-
+* **Bronze:** Guarantees the immutability of raw data, serving as a reliable source for reprocessing.
 * **Silver:** Standardizes and cleans the data, making it ready for consumption and analysis, with the added benefit of partitioning for query optimization.
-
 * **Gold:** Provides aggregated data ready for analytical use or for feeding dashboards, without the need to re-process large volumes repeatedly.
 
 ### Partitioning Strategy
@@ -138,10 +129,8 @@ The pipeline includes validations to ensure data quality. Test functions were cr
 
 For production monitoring, the following would be implemented:
 
-* **Airflow UI:** The Airflow interface provides a visual status of tasks (success, failure, running).
-
+* **UI of Airflow:** The Airflow interface provides a visual status of tasks (success, failure, running).
 * **Email/Slack Alerts:** Configure callbacks in Airflow to send notifications via email or Slack in case of a task failure.
-
 * **Data Quality Checks:** Tools like **Great Expectations** could be integrated to validate data quality at each data lake layer and fail the pipeline if integrity is compromised.
 
 ---

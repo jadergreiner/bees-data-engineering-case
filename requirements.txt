@@ -1,0 +1,9 @@
+# requirements.txt
+# List of Python dependencies for the project
+
+requests
+pandas
+polars
+fastparquet
+apache-airflow
+psycopg2-binary
