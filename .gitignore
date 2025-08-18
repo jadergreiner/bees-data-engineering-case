@@ -1,0 +1,7 @@
+dags/__pycache__/
+data/bronze/
+data/silver/
+data/gold/
+logs/*
+tests/__pycache__/
+src/__pycache__/
