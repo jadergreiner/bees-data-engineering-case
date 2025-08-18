@@ -5,6 +5,8 @@
 # Use the official Airflow image as the base
 FROM apache/airflow:2.8.1
 
+ENV PYTHONPATH="${PYTHONPATH}:/opt/airflow/src"
+
 # Install pandas and requests
 # pandas is used for data manipulation and transformation.
 # requests is used for making HTTP requests to the API.
