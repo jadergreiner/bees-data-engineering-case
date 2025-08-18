@@ -22,6 +22,7 @@ with DAG(
     # and save it to the Bronze layer.
     extract_data_bronze = BashOperator(
         task_id="extract_data_bronze",
+        # Usando o caminho absoluto do contêiner Docker para o diretório de scripts.
         bash_command="python /opt/airflow/src/ingestion.py",
     )
 
@@ -30,6 +31,7 @@ with DAG(
     # save it to the Silver layer in Parquet format, partitioned by state.
     transform_data_silver = BashOperator(
         task_id="transform_data_silver",
+        # Usando o caminho absoluto do contêiner Docker para o diretório de scripts.
         bash_command="python /opt/airflow/src/transformation.py",
     )
 
@@ -38,6 +40,7 @@ with DAG(
     # to count breweries per type and state, and save it to the Gold layer.
     aggregate_data_gold = BashOperator(
         task_id="aggregate_data_gold",
+        # Usando o caminho absoluto do contêiner Docker para o diretório de scripts.
         bash_command="python /opt/airflow/src/aggregation.py",
     )
 

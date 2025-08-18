@@ -1,7 +1,3 @@
-# docker-compose.yml
-# This file orchestrates the services required for the data pipeline, including
-# an Airflow environment and a PostgreSQL database for its metadata.
-
 version: '3.7'
 
 services:
@@ -28,6 +24,8 @@ services:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./data:/opt/airflow/data
+      # Adiciona a nova configuração de volume para a pasta src
+      - ./src:/opt/airflow/src
     # Command to initialize and run the webserver
     command: webserver
     # Health check to ensure the webserver is running and responsive
@@ -55,6 +53,8 @@ services:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./data:/opt/airflow/data
+      # Adiciona a nova configuração de volume para a pasta src
+      - ./src:/opt/airflow/src
     # Command to run the scheduler
     command: scheduler
     # Health check for the scheduler process
